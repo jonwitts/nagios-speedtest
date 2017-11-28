@@ -2,7 +2,7 @@
 #
 # Script to check Internet connection speed using speedtest-cli
 #
-# Jon Witts - 20150228
+# Jon Witts - 20170830
 #
 #########################################################################################################################################################
 #
@@ -20,7 +20,7 @@
 ########################################################################################################################################################
 
 plugin_name="Nagios speedtest-cli plugin"
-version="1.2 2015022818.19"
+version="1.2 2017083022.20"
 
 #####################################################################
 #
@@ -34,6 +34,7 @@ version="1.2 2015022818.19"
 #
 #       Version 1.2 - Added ability to check speed from an internal Speedtest Mini
 #                       server. Idea sugested by Erik Brouwer
+#                   - Added check for bc binary
 #
 #
 #
@@ -245,6 +246,9 @@ isnumeric $DLc "Download Critical Level"
 isnumeric $ULw "Upload Warning Level"
 isnumeric $ULc "Upload Critical Level"
 #isnumeric $Serv "Server Number ID"
+
+# Check if binary bc is installed
+type bc >/dev/null 2>&1 || { echo >&2 "Please install bc binary (in order to do floating point operations)"; exit 3; }
 
 # Check that warning levels are not less than critical levels
 if float_cond "$DLw < $DLc"; then
