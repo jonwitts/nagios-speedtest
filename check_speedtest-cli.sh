@@ -2,7 +2,7 @@
 #
 # Script to check Internet connection speed using speedtest-cli
 #
-# Jon Witts - 20170830
+# Jon Witts and others - https://github.com/jonwitts/nagios-speedtest/
 #
 #########################################################################################################################################################
 #
@@ -20,7 +20,7 @@
 ########################################################################################################################################################
 
 plugin_name="Nagios speedtest-cli plugin"
-version="1.2 2017112810:06"
+version="1.2 2017112810:20"
 
 #####################################################################
 #
@@ -36,7 +36,7 @@ version="1.2 2017112810:06"
 #                       server. Idea sugested by Erik Brouwer
 #                   - Added check for bc binary - Jorgen - jvandermeulen
 #                   - Minor adjustments to help files
-#
+#                   - Change to perf data output - see https://github.com/jonwitts/nagios-speedtest/issues/2
 #
 
 #####################################################################
@@ -371,7 +371,7 @@ else
 fi
 
 nagout="$status - Ping = $ping $pingUOM Download = $download $downloadUOM Upload = $upload $uploadUOM"
-perfout="|'download'=$download;$DLw;$DLc 'upload'=$upload;$ULw;$ULc"
+perfout="|'download'=$download;$DLw;$DLc;0;$(echo $DLw4|bc) 'upload'=$upload;$ULw;$ULc;0;$(echo $ULw4|bc)"
 
 # append perfout if argument was passed to script
 if [ "$PerfData" == "TRUE" ]; then
