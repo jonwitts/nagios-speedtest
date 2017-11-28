@@ -20,7 +20,7 @@
 ########################################################################################################################################################
 
 plugin_name="Nagios speedtest-cli plugin"
-version="1.2 2017083022.20"
+version="1.2 2017112810:06"
 
 #####################################################################
 #
@@ -34,8 +34,8 @@ version="1.2 2017083022.20"
 #
 #       Version 1.2 - Added ability to check speed from an internal Speedtest Mini
 #                       server. Idea sugested by Erik Brouwer
-#                   - Added check for bc binary
-#
+#                   - Added check for bc binary - Jorgen - jvandermeulen
+#                   - Minor adjustments to help files
 #
 #
 
@@ -102,7 +102,7 @@ locundef()
 	$plugin_name - Version: $version
 
 	You have not defined the location of the speedtest binary in the script! You MUST do
-	this before running the script. See line 170 of the script!
+	this before running the script. See line 171 of the script!
 
 	******************************************************************************************
 EOF
