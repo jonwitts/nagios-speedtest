@@ -20,7 +20,7 @@
 ########################################################################################################################################################
 
 plugin_name="Nagios speedtest-cli plugin"
-version="1.2 2017112810:20"
+version="1.2 2017122010:05"
 
 #####################################################################
 #
@@ -371,7 +371,7 @@ else
 fi
 
 nagout="$status - Ping = $ping $pingUOM Download = $download $downloadUOM Upload = $upload $uploadUOM"
-perfout="|'download'=$download;$DLw;$DLc;0;$(echo $DLw4|bc) 'upload'=$upload;$ULw;$ULc;0;$(echo $ULw4|bc)"
+perfout="|'download'=$download;$DLw;$DLc;0;$(echo $DLw*4|bc) 'upload'=$upload;$ULw;$ULc;0;$(echo $ULw*4|bc)"
 
 # append perfout if argument was passed to script
 if [ "$PerfData" == "TRUE" ]; then
