@@ -20,7 +20,7 @@
 ########################################################################################################################################################
 
 plugin_name="Nagios speedtest-cli plugin"
-version="1.2 2017122010:05"
+version="1.2 2017122011:01"
 
 #####################################################################
 #
@@ -61,6 +61,10 @@ usage()
 		"speedtest --list | less" to find your nearest server and note the number of the server 
                 or use the URL of an internal Speedtest Mini Server
 	-p	Output Performance Data
+        -m      Download Maximum Level - *Required if you request perfdata* - integer or floating point
+                Provide the maximum possible download level in Mbit/s for your connection
+        -M      Upload Maximum Level - *Required if you request perfdata* - integer or floating point
+                Provide the maximum possible upload level in Mbit/s for your connection
 	-v	Output plugin version
 	-V	Output debug info for testing
 
@@ -102,7 +106,7 @@ locundef()
 	$plugin_name - Version: $version
 
 	You have not defined the location of the speedtest binary in the script! You MUST do
-	this before running the script. See line 171 of the script!
+	this before running the script. See line 175 of the script!
 
 	******************************************************************************************
 EOF
@@ -123,7 +127,7 @@ isnumeric()
 }
 
 #####################################################################
-# functions for floating point operations - require bc!
+# functions for floating point operations - requires bc!
 
 #####################################################################
 # Default scale used by float functions.
@@ -178,10 +182,12 @@ ULc=
 Loc=
 SEs=
 PerfData=
+MaxDL=
+MaxUL=
 debug=
 
 # Retrieve the arguments using getopts
-while getopts "hw:c:W:C:l:s:pvV" OPTION
+while getopts "hw:c:W:C:l:s:pm:M:vV" OPTION
 do
 	case $OPTION in
 	h)
@@ -203,12 +209,18 @@ do
 	l)
 		Loc=$OPTARG
 		;;
-	s)	
+	s)
 		SEs=$OPTARG
 		;;
 	p)
 		PerfData="TRUE"
 		;;
+        m)
+                MaxDL=$OPTARG
+                ;;
+        M)
+                MaxUL=$OPTARG
+                ;;
 	v)
 		echo "$plugin_name. Version number: $version"
 		exit 3
@@ -233,6 +245,15 @@ then
 	exit 3
 fi
 
+# Check for empty upload and download maximum arguments if perfdata has been requested
+if [ "$PerfData" == "TRUE" ]; then
+        if [[ -z $MaxDL ]] || [[ -z $MaxUL ]]
+	then
+		usage
+		exit 3
+        fi
+fi
+
 # Check for invalid argument passed to $Loc and exit to usage if found
 if [[ "$Loc" != "e" ]] && [[ "$Loc" != "i" ]]
 then
@@ -245,7 +266,11 @@ isnumeric $DLw "Download Warning Level"
 isnumeric $DLc "Download Critical Level"
 isnumeric $ULw "Upload Warning Level"
 isnumeric $ULc "Upload Critical Level"
-#isnumeric $Serv "Server Number ID"
+# Only check upload and download maximums if perfdata requested
+if [ "$PerfData" == "TRUE" ]; then
+	isnumeric $MaxDL "Download Maximum Level"
+	isnumeric $MaxUL "Upload Maximum Level"
+fi
 
 # Check if binary bc is installed
 type bc >/dev/null 2>&1 || { echo >&2 "Please install bc binary (in order to do floating point operations)"; exit 3; }
@@ -307,7 +332,7 @@ if [ "$debug" == "TRUE" ]; then
 fi
 
 if [ "$element_count" -ne "$expected_count" ]; then
-	echo "You do not have the expected number of indices in your output from SpeedTest. Is it correctly installed?"
+	echo "You do not have the expected number of indices in your output from SpeedTest. Is it correctly installed? Try running the check with the -V argument to see what is going wrong."
 	usage
 	exit 3
 fi
@@ -371,13 +396,13 @@ else
 fi
 
 nagout="$status - Ping = $ping $pingUOM Download = $download $downloadUOM Upload = $upload $uploadUOM"
-perfout="|'download'=$download;$DLw;$DLc;0;$(echo $DLw*4|bc) 'upload'=$upload;$ULw;$ULc;0;$(echo $ULw*4|bc)"
 
 # append perfout if argument was passed to script
 if [ "$PerfData" == "TRUE" ]; then
 	if [ "$debug" == "TRUE" ]; then
 		echo "PerfData requested!"
 	fi
+	perfout="|'download'=$download;$DLw;$DLc;0;$(echo $MaxDL*1.05|bc) 'upload'=$upload;$ULw;$ULc;0;$(echo $MaxUL*1.05|bc)"
 	nagout=$nagout$perfout
 fi
 
