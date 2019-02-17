@@ -20,7 +20,7 @@
 ########################################################################################################################################################
 
 plugin_name="Nagios speedtest-cli plugin"
-version="1.2 2017122011:01"
+version="1.3 2019011713:50"
 
 #####################################################################
 #
@@ -28,15 +28,17 @@ version="1.2 2017122011:01"
 #
 #	Version 1.0 - Initial Release
 #
-#	Version 1.1 - Added requirement to use server id in test and need to define 
-#			full path to speedtest binary - thanks to Sigurdur Bjarnason
-#			for changes and improvements
+#	Version 1.1 - Added requirement to use server id in test and need to define
+#		      full path to speedtest binary - thanks to Sigurdur Bjarnason
+#		      for changes and improvements
 #
-#       Version 1.2 - Added ability to check speed from an internal Speedtest Mini
-#                       server. Idea sugested by Erik Brouwer
+#   	Version 1.2 - Added ability to check speed from an internal Speedtest Mini
+#                     server. Idea sugested by Erik Brouwer
 #                   - Added check for bc binary - Jorgen - jvandermeulen
 #                   - Minor adjustments to help files
 #                   - Change to perf data output - see https://github.com/jonwitts/nagios-speedtest/issues/2
+#
+#   	Version 1.3 - Added "-l a" option to automatic server selection
 #
 
 #####################################################################
@@ -54,17 +56,18 @@ usage()
 	-c	Download Critical Level - *Required* - integer or floating point
 	-W	Upload Warning Level - *Required* - integer or floating point
 	-C	Upload Critical Level - *Required* - integer or floating point
-        -l      Location of speedtest server - *Required * - takes either "i" or "e". If you pass "i" for
-                Internal then you will need to pass the URL of the Mini Server to the "s" option. If you pass
-                "e" for External then you must pass the server integer to the "s" option.
-	-s	Server integer or URL for the speedtest server to test against - *Required* - Run 
-		"speedtest --list | less" to find your nearest server and note the number of the server 
-                or use the URL of an internal Speedtest Mini Server
+    -l      Location of speedtest server - *Required * - takes either "i", "e" or "a". If you pass "i" for
+            Internal then you will need to pass the URL of the Mini Server to the "s" option. If you pass
+            "e" for External then you must pass the server integer to the "s" option.
+            If you pass "a" the server will be choosen automatically by minimum geological location.
+	-s	Server integer or URL for the speedtest server to test against - *Required* - Run
+		"speedtest --list | less" to find your nearest server and note the number of the server
+        or use the URL of an internal Speedtest Mini Server
 	-p	Output Performance Data
-        -m      Download Maximum Level - *Required if you request perfdata* - integer or floating point
-                Provide the maximum possible download level in Mbit/s for your connection
-        -M      Upload Maximum Level - *Required if you request perfdata* - integer or floating point
-                Provide the maximum possible upload level in Mbit/s for your connection
+    -m      Download Maximum Level - *Required if you request perfdata* - integer or floating point
+            Provide the maximum possible download level in Mbit/s for your connection
+    -M      Upload Maximum Level - *Required if you request perfdata* - integer or floating point
+            Provide the maximum possible upload level in Mbit/s for your connection
 	-v	Output plugin version
 	-V	Output debug info for testing
 
@@ -169,7 +172,7 @@ function float_cond()
 
 # Set up the variable for the location of the speedtest binary.
 # Edit the line below so that the variable is defined as the location
-# to speedtest on your system. On mine it is /usr/local/bin 
+# to speedtest on your system. On mine it is /usr/local/bin
 # Ensure to leave the last slash off!
 # You MUST define this or the script will not run!
 STb=
@@ -239,7 +242,7 @@ then
 fi
 
 # Check for empty arguments and exit to usage if found
-if  [[ -z $DLw ]] || [[ -z $DLc ]] || [[ -z $ULw ]] || [[ -z $ULc ]] || [[ -z $Loc ]] || [[ -z $SEs ]]
+if  [[ -z $DLw ]] || [[ -z $DLc ]] || [[ -z $ULw ]] || [[ -z $ULc ]] || [[ -z $Loc ]]
 then
 	usage
 	exit 3
@@ -255,7 +258,7 @@ if [ "$PerfData" == "TRUE" ]; then
 fi
 
 # Check for invalid argument passed to $Loc and exit to usage if found
-if [[ "$Loc" != "e" ]] && [[ "$Loc" != "i" ]]
+if [[ "$Loc" != "e" ]] && [[ "$Loc" != "i" ]] && [[ "$Loc" != "a" ]]
 then
 	usage
 	exit 3
@@ -307,6 +310,13 @@ elif [ "$Loc" == "i" ]; then
 		echo "Internal Server defined"
 	fi
 	command=$($STb/speedtest --mini=$SEs --simple)
+elif [ "$Loc" == "a" ]; then
+    if [ "$debug" == "TRUE" ]; then
+        echo "Automatic Server defined"
+    fi
+
+    SEs=$($STb/speedtest --list | head -n 2 | tail -n1 | awk '{ print $1; }' | sed 's/)//g')
+    command=$($STb/speedtest --server=$SEs --simple)
 else
 	if [ "$debug" == "TRUE" ]; then
 		echo "We should never get here as we checked the contents of Location variable earlier!"
