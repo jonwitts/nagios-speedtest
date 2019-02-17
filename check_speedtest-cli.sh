@@ -175,7 +175,7 @@ function float_cond()
 # to speedtest on your system. On mine it is /usr/local/bin
 # Ensure to leave the last slash off!
 # You MUST define this or the script will not run!
-STb=/usr/local/bin
+STb=
 
 # Set up the variables to take the arguments
 DLw=
