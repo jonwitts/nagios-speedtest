@@ -38,7 +38,7 @@ version="1.3 2019011713:50"
 #                   - Minor adjustments to help files
 #                   - Change to perf data output - see https://github.com/jonwitts/nagios-speedtest/issues/2
 #
-#   	Version 1.3 - Added -a option to replace -l -s combination with automatic server selection
+#   	Version 1.3 - Added "-l a" option to automatic server selection
 #
 
 #####################################################################
