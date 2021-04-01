@@ -107,8 +107,7 @@ def locundef():
 # e.g. C:/Program Files/speedtest.exe
 #
 # You MUST define this or the script will not run!
-#STb = "/usr/bin/speedtest"
-STb = "F:/git repos/nagios-speedtest/speedtest.exe"
+STb = "/usr/bin/speedtest"
 
 # Set starting values for variables
 DLw = None
