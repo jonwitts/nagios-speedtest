@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 # Script to check Internet connection speed using speedtest native client from https://www.speedtest.net/apps/cli
 #
 # Jon Witts and others - https://github.com/jonwitts/nagios-speedtest/
