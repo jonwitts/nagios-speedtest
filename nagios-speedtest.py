@@ -246,7 +246,7 @@ if debug == True:
 
 # Launch the speedtest binary and capture the result
 try:
-    data = subprocess.run([STb, "-f", "json"], capture_output=True)
+    data = subprocess.run([STb, "-f", "json"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 except subprocess.CalledProcessError as err:
     print("\n" + err.output + "\n")
     usage()
